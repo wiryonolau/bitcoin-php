@@ -13,8 +13,11 @@ $paymentUrl = 'http://192.168.0.223:81/bitcoin-php/examples/bip70.fetch.php?time
 
 // Create a signer for x509+sha256 - this requires a readable private key and certificate chain.
 // $signer = new PaymentRequestSigner('none');
+
 $signer = new RequestSigner('x509+sha256', '../tests/ssl/server.key', '../tests/ssl/server.crt');
-$builder = new RequestBuilder($signer, 'main', time());
+
+$builder = new RequestBuilder();
+$builder->setSigner($signer)->setNetwork('main')->setTime(time());
 
 // PaymentRequests contain outputs that the wallet will fulfill
 $address = AddressFactory::fromString($destination);
@@ -30,7 +33,8 @@ fclose($fd);
 
 // Create a url + display a QR
 $encodedUrl = urlencode($paymentUrl);
-$uri = "bitcoin:$address?r=$encodedUrl&amount=0.00010000";
+
+$uri = "bitcoin:".$address->getAddress()."?r=$encodedUrl&amount=0.00010000";
 $qr = urlencode($uri);
 
 echo "<a href='$uri'>Pay<img src='https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=$qr'></a>";
